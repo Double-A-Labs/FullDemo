@@ -1,5 +1,6 @@
 ﻿import { Vector3 } from "@babylonjs/core";
 import { getBackgroundPosition } from '../site.js';
+import { currentUserMeshes } from './babylonMaster.js';
 
 let currentMesh;
 let interfaceIntent;
@@ -35,7 +36,7 @@ const pointerMove = (scene, backgroundPlane) => {
         return;
     }
 
-    camera.lockedTarget = currentUsers[0];
+    camera.lockedTarget = currentUserMeshes[0];
 
     let diff = current.subtract(startingPoint);
     let adjustedDiff = new Vector3(diff._x * 0.5, diff._y * 0.5, diff._z)

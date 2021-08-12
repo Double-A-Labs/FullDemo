@@ -1,42 +1,36 @@
-﻿import { pasteFrameData, deregisterFrameCallback } from './frameMaster.js';
-import { socketLabel } from '../site.js';
+﻿import { pasteFrameData, deregisterFrameCallback, serverVideoData } from './frameMaster.js';
+import { updateLocalStorage, localStorageEnum } from '../site.js';
 
+const { socket, serverVid, sUrl } = localStorageEnum;
 let websocket;
-
-const socketStatus = {
-    closed: 'Closed',
-    open: 'Open',
-    connecting: 'Connecting',
-    error: 'Error'
-};
 
 export const connectToServer = (endpoint, video) => {
     const currentPort = location.port;
     return new Promise((resolve, reject) => {
         if (websocket && websocket.OPEN && websocket.port === currentPort) {
             const error = new Error(`Websocket already running at: ${websocket.URL}`);
-            updateSocketStatusMsg(error);
             reject(error);
         }
 
-        updateSocketStatusMsg('connecting');
-        websocket = new WebSocket(`wss://localhost:${location.port}/ws/video/${endpoint}`);
+        const url = `wss://localhost:${location.port}/ws/video/${endpoint}`;
+        websocket = new WebSocket(url);
         websocket.binaryType = "arraybuffer";
 
         websocket.onopen = () => {
-            updateSocketStatusMsg('open');
-            resolve(websocket)
+            updateLocalStorage(socket, 'Open');
+            updateLocalStorage(sUrl, url)
+            resolve(websocket);
         }
 
         websocket.onclose = () => {
-            updateSocketStatusMsg('closed');
+            updateLocalStorage(socket, 'Closed');
             deregisterFrameCallback(video);
         }
 
         websocket.onerror = err => {
-            updateSocketStatusMsg('error');
-            reject(err);
+            updateLocalStorage(socket, 'Error');
             deregisterFrameCallback(video);
+            reject(err);
         }
 
         websocket.onmessage = (e) => onDataReceived(e);
@@ -45,8 +39,5 @@ export const connectToServer = (endpoint, video) => {
 
 const onDataReceived = (e) => {
     pasteFrameData(e.data);
-}
-
-const updateSocketStatusMsg = (status) => {
-    socketLabel.innerHTML = `Current WebSocket Status: ${socketStatus[status]}`;
+    updateLocalStorage(serverVid, serverVideoData)
 }

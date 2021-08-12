@@ -2,9 +2,10 @@
 import { connectToServer } from './socketMaster.js';
 import { requestWebcamAccess } from './webcam.js';
 
-import { handleErrors } from '../site.js'
+import { updateLocalStorage, localStorageEnum } from '../site.js'
 import { clearUserAvatars, createNewUser } from './babylonMaster.js';
 
+const { meeting, error } = localStorageEnum;
 const stopBtn = document.getElementById('stop');
 const startBtn = document.getElementById('start');
 const newUserBtn = document.getElementById('newUser');
@@ -20,6 +21,7 @@ const toggleNewUserBtn = () => {
 }
 
 const OnStopClick = (websocket, video) => {
+    updateLocalStorage(meeting, 'Ending');
     if (websocket && websocket.readyState !== websocket.OPEN) {
         websocket.close();
     }
@@ -33,10 +35,12 @@ const OnStopClick = (websocket, video) => {
     toggleNewUserBtn();
 
     clearUserAvatars();
+    updateLocalStorage(meeting, 'Ended');
 }
 
-const OnStartClick = (videoElem) =>
-    connectToServer('test', videoElem)
+const OnStartClick = (videoElem) => {
+    updateLocalStorage(meeting, 'Starting');
+    return connectToServer('test', videoElem)
         .then(websocket => {
             stopBtn.onclick = () => OnStopClick(websocket, videoElem);
             videoElem.onplaying = registerFrameCallback(videoElem, () => sendFrameData(websocket, videoElem));
@@ -48,19 +52,21 @@ const OnStartClick = (videoElem) =>
                     videoElem.play();
                     toggleStartStopButtons();
                     toggleNewUserBtn();
+                    updateLocalStorage(meeting, 'Live');
                 })
                 .catch(err => {
-                    console.log(1111)
-                    return err;
+                    console.error('requestWebcamAccess', err);
+                    updateLocalStorage(error, err.message);
                 });
 
         })
         .catch(err => {
-            console.log(2222)
-            handleErrors('connectToServer', err);
+            console.log('connectToServer', err);
+            updateLocalStorage(error, err.message);
         });
+};
 
 export const setupButtons = (videoElem) => {
-    startBtn.onclick = () => OnStartClick(videoElem);
+    startBtn.onclick = () => OnStartClick(videoElem)
     toggleStartStopButtons();
 }

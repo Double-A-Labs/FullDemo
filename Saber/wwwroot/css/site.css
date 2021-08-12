@@ -59,8 +59,9 @@ html {
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+    overflow: hidden;
 }
 .footer {
   position: absolute;
@@ -68,4 +69,10 @@ body {
   width: 100%;
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
+}
+
+.col,
+[class*="col-"] {
+   padding-bottom: 10px;
+   padding-top: 10px;
 }

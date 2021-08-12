@@ -1,11 +1,16 @@
-﻿import { updateUserAvatarsTextures } from './babylonMaster';
-
+﻿import { updateLocalStorage, localStorageEnum } from '../site';
+import { updateUserTextures } from './babylonMaster';
+const { origVid, error } = localStorageEnum;
 
 let requestFrameId = null;
 export const width = 320;
 export const height = 320;
 const circleX = width / 2;
 const circleY = height / 2;
+
+let originVideoData = {};
+export let serverVideoData = {};
+let tmpCanvas = document.createElement('canvas');
 
 export const registerFrameCallback = (video, callbackMethod) => {
     if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
@@ -24,7 +29,6 @@ export const deregisterFrameCallback = (video) => {
 }
 
 export const sendFrameData = (websocket, video) => {
-    const tmpCanvas = document.createElement('canvas');
     tmpCanvas.height = height + 200;
     tmpCanvas.width = width;
 
@@ -44,13 +48,23 @@ export const sendFrameData = (websocket, video) => {
     }
 
     registerFrameCallback(video, () => sendFrameData(websocket, video));
+
+    originVideoData.canvasHeight = tmpCanvas.height;
+    originVideoData.canvasWidth = tmpCanvas.width;
+    originVideoData.imageHeight = image.height;
+    originVideoData.imageWidth = image.width;
+    originVideoData.totalBytes = image.data.byteLength;
+   
+    updateLocalStorage(origVid, originVideoData);
 }
 
 export const pasteFrameData = (buffer) => {
     try {
         const arr = new Uint8ClampedArray(buffer);
-        updateUserAvatarsTextures(arr); 
-    } catch (e) {
-        console.error("pasteFrameData: ", e);
+        serverVideoData.totalBytes = arr.byteLength;
+        updateUserTextures(arr);
+    } catch (err) {
+        console.error('pasteFrameData', err);
+        updateLocalStorage(error, err.message);
     }
 }

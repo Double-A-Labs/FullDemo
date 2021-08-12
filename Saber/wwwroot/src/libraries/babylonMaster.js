@@ -22,14 +22,17 @@ import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { setupPanning } from './panMaster.js';
 import { setupPointers } from './pointerMaster.js';
 import { setupKeys } from './keyMaster.js';
+import { updateLocalStorage, localStorageEnum } from '../site.js';
 
+const { users } = localStorageEnum;
 const canvas = document.getElementById("renderCanvas");
 const engine = new Engine(canvas);
 let scene = new Scene(engine);
 let grid = new GridMaterial("grid", scene);
 
 let camera;
-export let currentUsers = [];
+export let currentUsers = {};
+export let currentUserMeshes = [];
 
 const setupBackgroundPlane = () => {
     let background_plane = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.BACKSIDE }, scene);
@@ -42,7 +45,7 @@ const setupBackgroundPlane = () => {
 };
 
 export const createNewUser = () => {
-    let userNumber = currentUsers.length + 1;
+    let userNumber = currentUserMeshes.length + 1;
     let userName = `avatar#${userNumber}`;
 
     let avatar_material = new StandardMaterial(`${userName}_mat`, scene);
@@ -62,25 +65,38 @@ export const createNewUser = () => {
     }
 
     let avatarDrag = new PointerDragBehavior({ dragPlaneNormal: new Vector3(0, 0, 1) });
-    avatarDrag.onDragStartObservable.add(() => {
-        console.log(`User ${userName} Drag Start`);
+    avatarDrag.onDragStartObservable.add((eventData) => {
+        console.info(`User ${userName} Drag Start`);
     });
-    avatarDrag.onDragObservable.add(() => {
-        console.log(`User ${userName} Dragging`);
+
+    avatarDrag.onDragObservable.add((eventData) => {
+        console.info(`User ${userName} Dragging`);
     });
-    avatarDrag.onDragEndObservable.add(() => {
-        console.log(`User ${userName} Drag End`);
+    avatarDrag.onDragEndObservable.add((eventData) => {
+        console.info(`User ${userName} Drag End`);
+        let endingPosition = currentUserMeshes[userNumber - 1].position
+
+        currentUsers[userName].currentPosition = endingPosition.toString();
+        updateLocalStorage(users, currentUsers);
     });
 
     avatar_mesh.addBehavior(avatarDrag);
 
-    console.log(`${userName} created`);
+    console.info(`${userName} created`);
+    currentUsers[userName] = {
+        userName,
+        userNumber,
+        startingPosition: avatar_mesh.position.toString(),
+        currentPosition: avatar_mesh.position.toString()
+    };
 
-    currentUsers.push(avatar_mesh);
+    currentUserMeshes.push(avatar_mesh);
+    updateLocalStorage(users, currentUsers);
 }
 
-export const updateUserAvatarsTextures = (data) => currentUsers.map(userAvatar =>
-    userAvatar.material.diffuseTexture = new RawTexture.CreateRGBATexture(data, 320, 320, scene));
+export const updateUserTextures = (data) => currentUserMeshes.map(mesh => {
+    mesh.material.diffuseTexture = new RawTexture.CreateRGBATexture(data, 320, 320, scene);
+});
 
 const setUpCamera = () => {
     camera = new ArcRotateCamera("Camera", 1.6, 1.6, 10, new Vector3(0, 0, 10), scene);
@@ -109,11 +125,8 @@ const setUpLights = () => {
 }
 
 export const clearUserAvatars = () => {
-    currentUsers.map(userAvatar => {
-        console.log(`${userAvatar.name} deleted`);
-        userAvatar.dispose()
-    });
-    currentUsers = [];
+    currentUserMeshes.map(mesh => mesh.dispose());
+    currentUserMeshes = [];
 }
 
 const startBabylon = () => {

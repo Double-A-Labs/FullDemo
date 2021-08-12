@@ -1,4 +1,4 @@
-﻿import { currentUsers } from './babylonMaster.js';
+﻿import { currentUserMeshes } from './babylonMaster.js';
 
 const keyMap = { 68: false, 65: false, 87: false, 83: false };
 const increment = 0.25;
@@ -18,46 +18,46 @@ const onKeyDown = (e, scene) => {
 
         if (keyMap[87] && keyMap[68]) {
             console.log('Up and Right')
-            currentUsers[0].position.y = currentUsers[0].position.y + increment;
-            currentUsers[0].position.x = currentUsers[0].position.x - increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[87] && keyMap[65]) {
             console.log('Up and Left')
-            currentUsers[0].position.y = currentUsers[0].position.y + increment;
-            currentUsers[0].position.x = currentUsers[0].position.x + increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[83] && keyMap[68]) {
             console.log('Down and Right')
-            currentUsers[0].position.y = currentUsers[0].position.y - increment;
-            currentUsers[0].position.x = currentUsers[0].position.x - increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[83] && keyMap[65]) {
             console.log('Down and Left')
-            currentUsers[0].position.y = currentUsers[0].position.y - increment;
-            currentUsers[0].position.x = currentUsers[0].position.x + increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[87]) {
             console.log('Up')
-            currentUsers[0].position.y = currentUsers[0].position.y + increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
         }
 
         if (keyMap[83]) {
             console.log('Down')
-            currentUsers[0].position.y = currentUsers[0].position.y - increment;
+            currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
         }
 
         if (keyMap[68]) {
             console.log('Right')
-            currentUsers[0].position.x = currentUsers[0].position.x - increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[65]) {
             console.log('Left')
-            currentUsers[0].position.x = currentUsers[0].position.x + increment;
+            currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
     }
@@ -69,7 +69,7 @@ const onKeyUp = (e) => {
     }
 }
 
-export const setupKeys = (currentUsers, scene) => {
-    window.onkeydown = (e) => onKeyDown(e, currentUsers, scene);
+export const setupKeys = (scene) => {
+    window.onkeydown = (e) => onKeyDown(e, scene);
     window.onkeyup = onKeyUp;
 };
