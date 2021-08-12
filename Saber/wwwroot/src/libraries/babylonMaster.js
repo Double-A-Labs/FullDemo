@@ -60,7 +60,7 @@ export const createNewUser = () => {
     avatar_mesh.material = avatar_material;
 
     if (userNumber > 1) {
-        let prevUserPos = currentUsers[currentUsers.length -1].position
+        let prevUserPos = currentUserMeshes[currentUserMeshes.length - 1].position
         avatar_mesh.position = new Vector3(prevUserPos._x + 2.5, prevUserPos._y, prevUserPos._z)
     }
 
