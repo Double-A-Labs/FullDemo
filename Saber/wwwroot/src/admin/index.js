@@ -145,7 +145,7 @@ const createTableHeaders = (table, data) => {
 
 const createOrigVidComponent = (originVideoData) => {
     let origVidComponent = document.createElement('div');
-    origVidComponent.classList.add('col-lg-6', 'text-center', 'shadow', 'rounded');
+    origVidComponent.classList.add('col', 'text-center', 'shadow', 'rounded');
     origVidComponent.appendChild(createHeader('Original Video Data'));
 
     let table = document.createElement('table');
@@ -168,7 +168,7 @@ const createOrigVidComponent = (originVideoData) => {
 
 const createSerVidComponent = (serverVideoData) => {
     let serverVidComponent = document.createElement('div');
-    serverVidComponent.classList.add('col-lg-6', 'text-center', 'shadow', 'rounded');
+    serverVidComponent.classList.add('col', 'text-center', 'shadow', 'rounded');
     serverVidComponent.appendChild(createHeader('Server Video Data'));
 
     let table = document.createElement('table');
