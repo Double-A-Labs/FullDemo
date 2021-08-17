@@ -1,5 +1,7 @@
 ﻿export const errorMsgElement = document.getElementById("errorMsg");
 export const annoucementElement = document.getElementById("annoucement");
+export const newUserBtn = document.getElementById('newUser');
+export const changeBgBtn = document.getElementById("changeBg");
 
 export const handleErrors = (location, error) => {
     let message = `${location} error: ${error.toString()}`;
@@ -20,23 +22,25 @@ export const getBackgroundPosition = (scene, backgroundPlane) => {
 }
 
 export const localStorageEnum = {
-    users: 'current_users',
-    meeting: 'meeting_status',
-    socket: 'websocket_status',
-    sUrl: 'websocket_url',
-    origVid: 'origin_video_data',
-    serverVid: 'server_video_data',
-    error: 'error_message'
+    users: 'currentUsers',
+    meeting: 'meetingStatus',
+    socket: 'websocketStatus',
+    wsUrl: 'websocketUrl',
+    origVid: 'originVideoData',
+    serverVid: 'serverVideoData',
+    currentBg: 'currentBackground',
+    error: 'errorMessage'
 };
 
 const intialLocalStorage = {
-    'current_users': {},
-    'meeting_status': '',
-    'socket_status': '',
-    'socket_url': '',
-    'origin_video_data': {},
-    'server_video_data': {},
-    'error': ''
+    'currentUsers': {},
+    'meetingStatus': '',
+    'websocketStatus': '',
+    'websocketUrl': '',
+    'originVideoData': {},
+    'serverVideoData': {},
+    'currentBackground': 0,
+    'errorMessage': ''
 }
 
 export const initializeLocalStorage = () => {

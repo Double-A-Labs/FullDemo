@@ -5,44 +5,68 @@ import "@babylonjs/core/Meshes/meshBuilder";
 import "@babylonjs/core/Materials/standardMaterial";
 
 import {
-    Engine,
-    Scene,
     ArcRotateCamera,
-    Vector3,
+    BackgroundMaterial,
+    Color4,
+    DirectionalLight,
+    Engine,
+    Layer,
     Mesh,
     MeshBuilder,
-    RawTexture,
-    Texture,
-    DirectionalLight,
     PointerDragBehavior,
-    Color4
+    RawTexture,
+    Scene,
+    StandardMaterial,
+    Texture,
+    Vector3
 } from "@babylonjs/core";
-import { GridMaterial } from "@babylonjs/materials/grid";
-import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
 import { setupPanning } from './panMaster.js';
 import { setupPointers } from './pointerMaster.js';
 import { setupKeys } from './keyMaster.js';
-import { updateLocalStorage, localStorageEnum } from '../site.js';
+import { localStorageEnum, updateLocalStorage } from '../site.js';
 
-const { users } = localStorageEnum;
+const { users, currentBg } = localStorageEnum;
 const canvas = document.getElementById("renderCanvas");
+let background;
+
 const engine = new Engine(canvas);
 let scene = new Scene(engine);
-let grid = new GridMaterial("grid", scene);
+
+export const backgrounds = ['collab_room', 'dbla_lobby', 'dtt_ds_bg', 'neon_cafe', 'ytgaming_bg'];
 
 let camera;
 export let currentUsers = {};
 export let currentUserMeshes = [];
 
 const setupBackgroundPlane = () => {
-    let background_plane = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.BACKSIDE }, scene);
+    const randomBgImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+    updateLocalStorage(currentBg, backgrounds.indexOf(randomBgImage));
 
-    background_plane.material = grid;
+    let background_plane = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    let bg_material = new BackgroundMaterial("bg_mat", scene);
+    bg_material.diffuseTexture = new Texture(`/video/${randomBgImage}.png`, scene);
+    bg_material.diffuseTexture.hasAlpha = true;
+    background_plane.material = bg_material;
     background_plane.checkCollisions = true;
     background_plane.position = new Vector3(0, 0, -2);
 
     return background_plane;
 };
+
+export const updateBackgroundImage = () => {
+    const currentBackgroundIndex = JSON.parse(window.localStorage.getItem(currentBg));
+    let nextBgIndex = currentBackgroundIndex + 1;
+
+    if (nextBgIndex === backgrounds.length) {
+        nextBgIndex = 0;
+    }
+
+    const selectedImage = backgrounds[nextBgIndex]; 
+    background = new Layer('background', `/video/${selectedImage}.png`, scene);
+    background.isBackground = true;
+
+    updateLocalStorage(currentBg, nextBgIndex);
+}
 
 export const createNewUser = () => {
     let userNumber = currentUserMeshes.length + 1;
@@ -92,6 +116,8 @@ export const createNewUser = () => {
 
     currentUserMeshes.push(avatar_mesh);
     updateLocalStorage(users, currentUsers);
+
+    return avatar_mesh;
 }
 
 export const updateUserTextures = (data) => currentUserMeshes.map(mesh => {
@@ -138,6 +164,7 @@ const startBabylon = () => {
     setupPanning(scene, camera, canvas)
     setupKeys(scene);
 /*    setupPointers(mesh, camera, backgroundPlane, scene); */
+    /*    setupPointers(mesh, camera, backgroundPlane, scene); */
 
     engine.runRenderLoop(() => {
         scene.render();

@@ -1,4 +1,7 @@
-﻿const admin = document.getElementById('admin');
+﻿import { newUserBtn, changeBgBtn } from '../site.js';
+import { updateBackgroundImage, createNewUser } from '../libraries/babylonMaster.js';
+
+const admin = document.getElementById('admin');
 const alertsRow = document.getElementById('alertsRow');
 const annoucementElementAdmin = document.getElementById('annoucementAdmin');
 
@@ -7,6 +10,10 @@ const socketLabelAdmin = document.getElementById("socketLabelAdmin");
 let userComponent;
 
 const init = () => {
+    newUserBtn.onclick = createNewUser;
+    changeBgBtn.onclick = updateBackgroundImage;
+    changeBgBtn.disabled = false;
+
     const {
         newSocketStatus,
         currentUsers,

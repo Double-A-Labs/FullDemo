@@ -2,14 +2,12 @@
 import { connectToServer } from './socketMaster.js';
 import { requestWebcamAccess } from './webcam.js';
 
-import { updateLocalStorage, localStorageEnum } from '../site.js'
+import { updateLocalStorage, localStorageEnum, newUserBtn } from '../site.js'
 import { clearUserAvatars, createNewUser } from './babylonMaster.js';
 
 const { meeting, error } = localStorageEnum;
 const stopBtn = document.getElementById('stop');
 const startBtn = document.getElementById('start');
-const newUserBtn = document.getElementById('newUser');
-newUserBtn.onclick = createNewUser;
 
 const toggleStartStopButtons = () => {
     startBtn.disabled = !startBtn.disabled;

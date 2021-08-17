@@ -28,9 +28,16 @@ export const deregisterFrameCallback = (video) => {
     }
 }
 
-export const sendFrameData = (websocket, video) => {
+export const sendFrameData = (websocket, video, metadata) => {
     tmpCanvas.height = height + 200;
     tmpCanvas.width = width;
+
+    if (metadata) {
+        originVideoData.captureTime = metadata.captureTime;
+        originVideoData.expectedDisplayTime = metadata.expectedDisplayTime;
+        originVideoData.presentationTime = metadata.presentationTime;
+        originVideoData.presentedFrames = metadata.presentedFrames;
+    }
 
     const tmpCtx = tmpCanvas.getContext('2d');
 
@@ -47,13 +54,18 @@ export const sendFrameData = (websocket, video) => {
         websocket.send(image.data)
     }
 
-    registerFrameCallback(video, () => sendFrameData(websocket, video));
+    registerFrameCallback(video, (_now, metadata) => sendFrameData(websocket, video, metadata));
+
+    const videoQuality = video.getVideoPlaybackQuality();
 
     originVideoData.canvasHeight = tmpCanvas.height;
     originVideoData.canvasWidth = tmpCanvas.width;
     originVideoData.imageHeight = image.height;
     originVideoData.imageWidth = image.width;
     originVideoData.totalBytes = image.data.byteLength;
+    originVideoData.totalFrames = videoQuality.totalFrames;
+    originVideoData.droppedFrames = videoQuality.droppedFrames;
+    originVideoData.corruptedFrames = videoQuality.corruptedFrames;
    
     updateLocalStorage(origVid, originVideoData);
 }

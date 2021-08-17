@@ -1,7 +1,7 @@
 ﻿import { pasteFrameData, deregisterFrameCallback, serverVideoData } from './frameMaster.js';
 import { updateLocalStorage, localStorageEnum } from '../site.js';
 
-const { socket, serverVid, sUrl } = localStorageEnum;
+const { socket, serverVid, wsUrl } = localStorageEnum;
 let websocket;
 
 export const connectToServer = (endpoint, video) => {
@@ -18,7 +18,7 @@ export const connectToServer = (endpoint, video) => {
 
         websocket.onopen = () => {
             updateLocalStorage(socket, 'Open');
-            updateLocalStorage(sUrl, url)
+            updateLocalStorage(wsUrl, url)
             resolve(websocket);
         }
 

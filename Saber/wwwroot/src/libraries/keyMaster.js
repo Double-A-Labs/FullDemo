@@ -17,46 +17,46 @@ const onKeyDown = (e, scene) => {
         keyMap[e.keyCode] = true;
 
         if (keyMap[87] && keyMap[68]) {
-            console.log('Up and Right')
+/*            console.log('Up and Right')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[87] && keyMap[65]) {
-            console.log('Up and Left')
+/*            console.log('Up and Left')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[83] && keyMap[68]) {
-            console.log('Down and Right')
+/*            console.log('Down and Right')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[83] && keyMap[65]) {
-            console.log('Down and Left')
+/*            console.log('Down and Left')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[87]) {
-            console.log('Up')
+/*            console.log('Up')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
         }
 
         if (keyMap[83]) {
-            console.log('Down')
+/*            console.log('Down')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
         }
 
         if (keyMap[68]) {
-            console.log('Right')
+/*            console.log('Right')*/
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[65]) {
-            console.log('Left')
+/*            console.log('Left')*/
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
