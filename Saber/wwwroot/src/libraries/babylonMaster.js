@@ -157,13 +157,12 @@ export const clearUserAvatars = () => {
 
 const startBabylon = () => {
     setupBackgroundPlane();
-/*    createNewUser();*/
+  /*  createNewUser();*/
     setUpLights();
     let camera = setUpCamera();
 
     setupPanning(scene, camera, canvas)
     setupKeys(scene);
-/*    setupPointers(mesh, camera, backgroundPlane, scene); */
     /*    setupPointers(mesh, camera, backgroundPlane, scene); */
 
     engine.runRenderLoop(() => {
