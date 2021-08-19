@@ -1,11 +1,17 @@
-﻿import { setupButtons } from '../libraries/buttonMaster.js';
-import { initializeLocalStorage } from '../site.js';
-import startBabylon from '../libraries/babylonMaster.js';
+﻿import { setupButtons } from '../libraries/buttonMaster';
+import { initializeLocalStorage } from '../libraries/localStorageMaster';
+import startBabylon from '../libraries/babylonMaster';
+import { initVideoCompressionMaster } from '../libraries/videoCompressionMaster';
+import { initFrameMaster } from '../libraries/frameMaster';
+import { initSocketMaster } from '../libraries/socketMaster';
 
 
 const init = async () => {
-    window.localStorage.clear();
     initializeLocalStorage();
+    initVideoCompressionMaster();
+    initFrameMaster();
+    initSocketMaster();
+
     let videoElem = document.createElement('video');
     startBabylon();
     setupButtons(videoElem);

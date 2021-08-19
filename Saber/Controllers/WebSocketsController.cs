@@ -35,14 +35,14 @@ namespace SaberDemo.Controllers
             }
         }
 
-        [HttpGet("/ws/video/test")]
-        public async Task StreamTest()
+        [HttpGet("/ws/stream")]
+        public async Task Stream()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
                 _logger.Log(LogLevel.Information, "Gathering stream data");
-                await VideoChatController.StreamTest(webSocket);
+                await VideoChatController.Stream(webSocket);
             }
             else
             {
@@ -50,6 +50,38 @@ namespace SaberDemo.Controllers
                 HttpContext.Response.StatusCode = 400;
             }
         }
+
+/*        [HttpGet("/ws/capture")]
+        public async Task Capture()
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                _logger.Log(LogLevel.Information, "Gathering capture data");
+                await VideoChatController.Capture(webSocket);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, "Failed to connect to websocket at provided URL");
+                HttpContext.Response.StatusCode = 400;
+            }
+        }*/
+
+/*        [HttpGet("/ws/replay")]
+        public async Task Replay()
+        {
+            if (HttpContext.WebSockets.IsWebSocketRequest)
+            {
+                using var webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                _logger.Log(LogLevel.Information, "Gathering replay data");
+                await VideoChatController.Replay(webSocket);
+            }
+            else
+            {
+                _logger.Log(LogLevel.Error, "Failed to connect to websocket at provided URL");
+                HttpContext.Response.StatusCode = 400;
+            }
+        }*/
 
         private async Task Echo(WebSocket webSocket)
         {

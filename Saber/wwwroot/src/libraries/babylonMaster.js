@@ -20,37 +20,32 @@ import {
     Texture,
     Vector3
 } from "@babylonjs/core";
-import { setupPanning } from './panMaster.js';
-import { setupPointers } from './pointerMaster.js';
-import { setupKeys } from './keyMaster.js';
-import { localStorageEnum, updateLocalStorage } from '../site.js';
+import { setupPanning } from './panMaster';
+import { setupPointers } from './pointerMaster';
+import { setupKeys } from './keyMaster';
+import { LSEnum, updateLocalStorage } from './localStorageMaster';
+import { setupChangeBgButton } from "./buttonMaster";
 
-const { users, currentBg } = localStorageEnum;
+const backgrounds = ['collab_room', 'dbla_lobby', 'dtt_ds_bg', 'neon_cafe', 'ytgaming_bg'];
 const canvas = document.getElementById("renderCanvas");
-let background;
-
 const engine = new Engine(canvas);
-let scene = new Scene(engine);
-
-export const backgrounds = ['collab_room', 'dbla_lobby', 'dtt_ds_bg', 'neon_cafe', 'ytgaming_bg'];
-
+const scene = new Scene(engine);
+let background; 
 let camera;
 export let currentUsers = {};
 export let currentUserMeshes = [];
 
 const setupBackgroundPlane = () => {
     const randomBgImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
-    updateLocalStorage(currentBg, backgrounds.indexOf(randomBgImage));
+    updateLocalStorage(LSEnum.currentBg, backgrounds.indexOf(randomBgImage));
 
-    let background_plane = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    background = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.DOUBLESIDE }, scene);
     let bg_material = new BackgroundMaterial("bg_mat", scene);
-    bg_material.diffuseTexture = new Texture(`/video/${randomBgImage}.png`, scene);
-    bg_material.diffuseTexture.hasAlpha = true;
-    background_plane.material = bg_material;
-    background_plane.checkCollisions = true;
-    background_plane.position = new Vector3(0, 0, -2);
+    bg_material.diffuseTexture = new Texture(`/content/${randomBgImage}.png`, scene);
 
-    return background_plane;
+    background.material = bg_material;
+    background.checkCollisions = true;
+    background.position = new Vector3(0, 0, -2);
 };
 
 export const updateBackgroundImage = () => {
@@ -61,11 +56,20 @@ export const updateBackgroundImage = () => {
         nextBgIndex = 0;
     }
 
-    const selectedImage = backgrounds[nextBgIndex]; 
-    background = new Layer('background', `/video/${selectedImage}.png`, scene);
-    background.isBackground = true;
+    background.material.diffuseTexture = new Texture(`/content/${backgrounds[nextBgIndex]}.png`, scene); ;
+    updateLocalStorage(LSEnum.currentBg, nextBgIndex);
+}
 
-    updateLocalStorage(currentBg, nextBgIndex);
+export const getBackgroundPosition = (scene, backgroundPlane) => {
+
+    let pickinfo = scene.pick(scene.pointerX, scene.pointerY,
+        (mesh) => mesh == backgroundPlane);
+
+    if (pickinfo.hit) {
+        return pickinfo.pickedPoint;
+    }
+
+    return null;
 }
 
 export const createNewUser = () => {
@@ -73,7 +77,7 @@ export const createNewUser = () => {
     let userName = `avatar#${userNumber}`;
 
     let avatar_material = new StandardMaterial(`${userName}_mat`, scene);
-    avatar_material.diffuseTexture = new Texture("/video/placeholder_video.jpg", scene);
+    avatar_material.diffuseTexture = new Texture("/content/placeholder_video.jpg", scene);
 
     let avatar_mesh = MeshBuilder.CreateDisc(`${userName}_disc`, { radius: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
     avatar_mesh.enableEdgesRendering();
@@ -101,7 +105,7 @@ export const createNewUser = () => {
         let endingPosition = currentUserMeshes[userNumber - 1].position
 
         currentUsers[userName].currentPosition = endingPosition.toString();
-        updateLocalStorage(users, currentUsers);
+        updateLocalStorage(LSEnum.users, currentUsers);
     });
 
     avatar_mesh.addBehavior(avatarDrag);
@@ -115,7 +119,7 @@ export const createNewUser = () => {
     };
 
     currentUserMeshes.push(avatar_mesh);
-    updateLocalStorage(users, currentUsers);
+    updateLocalStorage(LSEnum.users, currentUsers);
 
     return avatar_mesh;
 }
@@ -168,6 +172,8 @@ const startBabylon = () => {
     engine.runRenderLoop(() => {
         scene.render();
     });
+
+    setupChangeBgButton();
 };
 
 export default startBabylon;

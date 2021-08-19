@@ -1,34 +1,50 @@
-﻿import { pasteFrameData, deregisterFrameCallback, serverVideoData } from './frameMaster.js';
-import { updateLocalStorage, localStorageEnum } from '../site.js';
+﻿import { pasteFrameData, deregisterFrameCallback } from './frameMaster';
+import { LSEnum, updateLocalStorage } from './localStorageMaster';
+import { decompressData } from './videoCompressionMaster';
 
-const { socket, serverVid, wsUrl } = localStorageEnum;
+let currentPort;
+const socketBinaryType = "arraybuffer";
+let baseUrl;
+
+export const socketStates = {
+    open: "Open",
+    closed: "Closed",
+    error: "Error"
+}
+
 let websocket;
 
+export const isWebsocketReady = (socket) => Boolean(socket && socket.readyState === socket.OPEN)
+
+export const initSocketMaster = () => {
+    currentPort = location.port;
+    baseUrl = `wss://localhost:${currentPort}/ws/`;
+}
+
 export const connectToServer = (endpoint, video) => {
-    const currentPort = location.port;
     return new Promise((resolve, reject) => {
-        if (websocket && websocket.OPEN && websocket.port === currentPort) {
+        if (isWebsocketReady(websocket) && websocket.port === currentPort) {
             const error = new Error(`Websocket already running at: ${websocket.URL}`);
             reject(error);
         }
 
-        const url = `wss://localhost:${location.port}/ws/video/${endpoint}`;
-        websocket = new WebSocket(url);
-        websocket.binaryType = "arraybuffer";
+        const fullUrl = baseUrl + endpoint;
+        websocket = new WebSocket(fullUrl);
+        websocket.binaryType = socketBinaryType;
 
         websocket.onopen = () => {
-            updateLocalStorage(socket, 'Open');
-            updateLocalStorage(wsUrl, url)
+            updateLocalStorage(LSEnum.socket, socketStates.open);
+            updateLocalStorage(LSEnum.wsUrl, fullUrl)
             resolve(websocket);
         }
 
         websocket.onclose = () => {
-            updateLocalStorage(socket, 'Closed');
+            updateLocalStorage(LSEnum.socket, socketStates.closed);
             deregisterFrameCallback(video);
         }
 
         websocket.onerror = err => {
-            updateLocalStorage(socket, 'Error');
+            updateLocalStorage(LSEnum.socket, socketStates.error);
             deregisterFrameCallback(video);
             reject(err);
         }
@@ -38,6 +54,7 @@ export const connectToServer = (endpoint, video) => {
 };
 
 const onDataReceived = (e) => {
-    pasteFrameData(e.data);
-    updateLocalStorage(serverVid, serverVideoData)
+    const compressedBuffer = e.data;
+    const decompressedBuffer = decompressData(compressedBuffer);
+    pasteFrameData(decompressedBuffer);
 }

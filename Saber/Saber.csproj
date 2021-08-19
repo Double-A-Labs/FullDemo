@@ -15,6 +15,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Captures\" />
 		<Folder Include="wwwroot\dist\" />
 	</ItemGroup>
 

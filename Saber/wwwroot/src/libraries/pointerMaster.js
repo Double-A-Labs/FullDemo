@@ -1,6 +1,5 @@
 ﻿import { Vector3 } from "@babylonjs/core";
-import { getBackgroundPosition } from '../site.js';
-import { currentUserMeshes } from './babylonMaster.js';
+import { currentUserMeshes, getBackgroundPosition } from './babylonMaster';
 
 let currentMesh;
 let interfaceIntent;

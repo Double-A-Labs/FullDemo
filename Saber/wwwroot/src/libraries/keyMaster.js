@@ -1,4 +1,4 @@
-﻿import { currentUserMeshes } from './babylonMaster.js';
+﻿import { currentUserMeshes } from './babylonMaster';
 
 const keyMap = { 68: false, 65: false, 87: false, 83: false };
 const increment = 0.25;

@@ -1,25 +1,26 @@
-﻿import { registerFrameCallback, deregisterFrameCallback, sendFrameData } from './frameMaster.js';
-import { connectToServer } from './socketMaster.js';
-import { requestWebcamAccess } from './webcam.js';
+﻿import { registerFrameCallback, deregisterFrameCallback, sendFrameData, onCameraFrameCallback } from './frameMaster';
+import { connectToServer } from './socketMaster';
+import { requestWebcamAccess } from './webcamMaster';
 
-import { updateLocalStorage, localStorageEnum, newUserBtn } from '../site.js'
-import { clearUserAvatars, createNewUser } from './babylonMaster.js';
+import { updateLocalStorage, LSEnum } from './localStorageMaster'
+import { clearUserAvatars, createNewUser, updateBackgroundImage } from './babylonMaster';
 
-const { meeting, error } = localStorageEnum;
+export const meetingStates = {
+    waiting: 'Waiting',
+    starting: 'Starting',
+    live: 'Live',
+    ended: 'Ended'
+}
+
+const defaultWsEndpoint = 'stream';
+
 const stopBtn = document.getElementById('stop');
 const startBtn = document.getElementById('start');
-
-const toggleStartStopButtons = () => {
-    startBtn.disabled = !startBtn.disabled;
-    stopBtn.disabled = !startBtn.disabled;
-}
-
-const toggleNewUserBtn = () => {
-    newUserBtn.disabled = !newUserBtn.disabled;
-}
+const newUserBtn = document.getElementById('newUser');
+const changeBgBtn = document.getElementById("changeBg");
 
 const OnStopClick = (websocket, video) => {
-    updateLocalStorage(meeting, 'Ending');
+    updateLocalStorage(LSEnum.meeting, meetingStates.ended);
     if (websocket && websocket.readyState !== websocket.OPEN) {
         websocket.close();
     }
@@ -30,18 +31,18 @@ const OnStopClick = (websocket, video) => {
     video.srcObject = null;
 
     toggleStartStopButtons();
-    toggleNewUserBtn();
+    newUserBtn.disabled = true;
 
     clearUserAvatars();
-    updateLocalStorage(meeting, 'Ended');
+    updateLocalStorage(LSEnum.meeting, meetingStates.ended);
 }
 
 const OnStartClick = (videoElem) => {
-    updateLocalStorage(meeting, 'Starting');
-    return connectToServer('test', videoElem)
+    updateLocalStorage(LSEnum.meeting, meetingStates.starting);
+    return connectToServer(defaultWsEndpoint, videoElem)
         .then(websocket => {
             stopBtn.onclick = () => OnStopClick(websocket, videoElem);
-            videoElem.onplaying = registerFrameCallback(videoElem, () => sendFrameData(websocket, videoElem));
+            videoElem.onplaying = registerFrameCallback(videoElem, (_now, metadata) => onCameraFrameCallback(websocket, videoElem, metadata));
 
             requestWebcamAccess()
                 .then(stream => {
@@ -49,22 +50,37 @@ const OnStartClick = (videoElem) => {
                     videoElem.srcObject = stream;
                     videoElem.play();
                     toggleStartStopButtons();
-                    toggleNewUserBtn();
-                    updateLocalStorage(meeting, 'Live');
+                    setupNewUserButton();
+                    updateLocalStorage(LSEnum.meeting, meetingStates.live);
                 })
                 .catch(err => {
                     console.error('requestWebcamAccess', err);
-                    updateLocalStorage(error, err.message);
+                    updateLocalStorage(LSEnum.error, err.message);
                 });
 
         })
         .catch(err => {
-            console.log('connectToServer', err);
-            updateLocalStorage(error, err.message);
+            console.error('connectToServer', err);
+            updateLocalStorage(LSEnum.error, err.message);
         });
 };
+
+const toggleStartStopButtons = () => {
+    startBtn.disabled = !startBtn.disabled;
+    stopBtn.disabled = !startBtn.disabled;
+}
 
 export const setupButtons = (videoElem) => {
     startBtn.onclick = () => OnStartClick(videoElem)
     toggleStartStopButtons();
+}
+
+const setupNewUserButton = () => {
+    newUserBtn.onclick = createNewUser;
+    newUserBtn.disabled = false;
+}
+
+export const setupChangeBgButton = () => {
+    changeBgBtn.onclick = updateBackgroundImage;
+    changeBgBtn.disabled = false;
 }
