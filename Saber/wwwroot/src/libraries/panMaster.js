@@ -1,7 +1,7 @@
 ﻿let isPanning = false;
 let pickOrigin;
 
- export const panMove = (scene, backgroundPlane) => {
+export const panMove = (scene, backgroundPlane) => {
     if (!startingPoint) {
         return;
     }
@@ -18,7 +18,7 @@ let pickOrigin;
     cameraTarget.position.subtractInPlace(adjustedDiff);
 
     startingPoint = current;
-}; 
+};
 
 const beginPanning = (event, camera, scene, canvas) => {
     if (event.ctrlKey) {

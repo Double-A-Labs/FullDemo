@@ -1,4 +1,4 @@
-﻿import { setupButtons } from '../libraries/buttonMaster';
+﻿import { OnStartClick } from '../libraries/buttonMaster';
 import { initializeLocalStorage } from '../libraries/localStorageMaster';
 import startBabylon from '../libraries/babylonMaster';
 import { initVideoCompressionMaster } from '../libraries/videoCompressionMaster';
@@ -14,7 +14,8 @@ const init = async () => {
 
     let videoElem = document.createElement('video');
     startBabylon();
-    setupButtons(videoElem);
+
+    OnStartClick(videoElem);
 };
 
 window.onload = () => init();

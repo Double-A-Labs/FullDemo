@@ -7,7 +7,7 @@ const onKeyDown = (e, scene) => {
     // Shift+Ctrl+Alt+I
     if (e.shiftKey && e.ctrlKey && e.altKey && e.keyCode === 73) {
         if (scene.debugLayer.isVisible()) {
-            scene.scene.debugLayer.hide();
+            scene.debugLayer.hide();
         } else {
             scene.debugLayer.show();
         }
@@ -17,46 +17,38 @@ const onKeyDown = (e, scene) => {
         keyMap[e.keyCode] = true;
 
         if (keyMap[87] && keyMap[68]) {
-/*            console.log('Up and Right')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[87] && keyMap[65]) {
-/*            console.log('Up and Left')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[83] && keyMap[68]) {
-/*            console.log('Down and Right')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[83] && keyMap[65]) {
-/*            console.log('Down and Left')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 
         if (keyMap[87]) {
-/*            console.log('Up')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y + increment;
         }
 
         if (keyMap[83]) {
-/*            console.log('Down')*/
             currentUserMeshes[0].position.y = currentUserMeshes[0].position.y - increment;
         }
 
         if (keyMap[68]) {
-/*            console.log('Right')*/
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x - increment;
         }
 
         if (keyMap[65]) {
-/*            console.log('Left')*/
             currentUserMeshes[0].position.x = currentUserMeshes[0].position.x + increment;
         }
 

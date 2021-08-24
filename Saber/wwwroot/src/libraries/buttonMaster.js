@@ -14,12 +14,7 @@ export const meetingStates = {
 
 const defaultWsEndpoint = 'stream';
 
-const stopBtn = document.getElementById('stop');
-const startBtn = document.getElementById('start');
-const newUserBtn = document.getElementById('newUser');
-const changeBgBtn = document.getElementById("changeBg");
-
-const OnStopClick = (websocket, video) => {
+export const OnStopClick = (websocket, video) => {
     updateLocalStorage(LSEnum.meeting, meetingStates.ended);
     if (websocket && websocket.readyState !== websocket.OPEN) {
         websocket.close();
@@ -37,11 +32,10 @@ const OnStopClick = (websocket, video) => {
     updateLocalStorage(LSEnum.meeting, meetingStates.ended);
 }
 
-const OnStartClick = (videoElem) => {
+export const OnStartClick = (videoElem) => {
     updateLocalStorage(LSEnum.meeting, meetingStates.starting);
     return connectToServer(defaultWsEndpoint, videoElem)
         .then(websocket => {
-            stopBtn.onclick = () => OnStopClick(websocket, videoElem);
             videoElem.onplaying = registerFrameCallback(videoElem, (_now, metadata) => onCameraFrameCallback(websocket, videoElem, metadata));
 
             requestWebcamAccess()
@@ -49,8 +43,6 @@ const OnStartClick = (videoElem) => {
                     createNewUser();
                     videoElem.srcObject = stream;
                     videoElem.play();
-                    toggleStartStopButtons();
-                    setupNewUserButton();
                     updateLocalStorage(LSEnum.meeting, meetingStates.live);
                 })
                 .catch(err => {
@@ -64,23 +56,3 @@ const OnStartClick = (videoElem) => {
             updateLocalStorage(LSEnum.error, err.message);
         });
 };
-
-const toggleStartStopButtons = () => {
-    startBtn.disabled = !startBtn.disabled;
-    stopBtn.disabled = !startBtn.disabled;
-}
-
-export const setupButtons = (videoElem) => {
-    startBtn.onclick = () => OnStartClick(videoElem)
-    toggleStartStopButtons();
-}
-
-const setupNewUserButton = () => {
-    newUserBtn.onclick = createNewUser;
-    newUserBtn.disabled = false;
-}
-
-export const setupChangeBgButton = () => {
-    changeBgBtn.onclick = updateBackgroundImage;
-    changeBgBtn.disabled = false;
-}

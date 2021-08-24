@@ -94,7 +94,7 @@ export const updateComponentData = (name, data) => {
     let table = createTable(name, data);
 
     if (!component || !table) {
-       return addRowComponent(name, data);
+        return addRowComponent(name, data);
     }
 
     if (component.childNodes.length) {

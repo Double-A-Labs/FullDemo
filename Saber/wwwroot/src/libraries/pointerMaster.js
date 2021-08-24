@@ -75,10 +75,10 @@ const onPointerObservable = (pointerInfo, camera, backgroundPlane, scene) => {
     }
 };
 
-export const setUpPointers = (scene, camera, backgroundPlane) => {
+const setUpPointers = (scene, camera, backgroundPlane) => {
     cameraTarget = MeshBuilder.CreateDisc("camTarget", { radius: 1 }, scene);
     cameraTarget.position = new Vector3(2, 2, -0.5);
     camera.lockedTarget = cameraTarget;
 
-   scene.onPointerObservable.add((pointerInfo) => onPointerObservable(pointerInfo, camera, backgroundPlane, scene));
+    scene.onPointerObservable.add((pointerInfo) => onPointerObservable(pointerInfo, camera, backgroundPlane, scene));
 }

@@ -36,7 +36,7 @@ const updateFrameTimes = (type, currentTime) => {
 }
 
 const isUnderFrameRateLimit = (time) => {
-    const { options: { sendFrameRateLimit } , sendFrameTimes } = getLocalStorageData(LSEnum.compress);
+    const { options: { sendFrameRateLimit }, sendFrameTimes } = getLocalStorageData(LSEnum.compress);
 
     let numSendFrameTimes = sendFrameTimes.length
     let lastSendTime = numSendFrameTimes > 0 ? sendFrameTimes[numSendFrameTimes - 1] : 0;
@@ -66,7 +66,7 @@ export const onCameraFrameCallback = (websocket, video, metadata) => {
         updateFrameTimes('send', time);
 
         tmpCanvas.height = height + 200;
-        tmpCanvas.width = width;
+        tmpCanvas.width = width + 200;
 
         const tmpCtx = tmpCanvas.getContext(context);
 
@@ -95,7 +95,7 @@ export const onCameraFrameCallback = (websocket, video, metadata) => {
 const updateOriginalVideoData = (image, video, metadata) => {
     const originVideoData = getLocalStorageData(LSEnum.origVid);
     const videoQuality = video.getVideoPlaybackQuality();
-    console.log(123, metadata);
+    /*    console.log(123, metadata);*/
     if (image) {
         originVideoData.imageHeight = image.height;
         originVideoData.imageWidth = image.width;

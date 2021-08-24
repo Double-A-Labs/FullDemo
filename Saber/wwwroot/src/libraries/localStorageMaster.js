@@ -43,7 +43,7 @@ const initialLocalStorage = {
         'totalFrames': 0,
         'droppedFrames': 0,
         'corruptedFrames': 0
-     },
+    },
     'serverVideoData': {
         'totalBytes': 0
     },
@@ -54,7 +54,7 @@ const initialLocalStorage = {
             'sendFrameRateLimit': 30,
             'sendKeyframeInterval': 2000,
             'algorithm': 'LZ4'
-        }, 
+        },
         'isLittleEndian': null,
         'sourceFrameTimes': [],
         'sendFrameTimes': [],

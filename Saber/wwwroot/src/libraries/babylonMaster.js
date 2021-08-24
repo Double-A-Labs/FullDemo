@@ -7,10 +7,10 @@ import "@babylonjs/core/Materials/standardMaterial";
 import {
     ArcRotateCamera,
     BackgroundMaterial,
+    Color3,
     Color4,
-    DirectionalLight,
     Engine,
-    Layer,
+    HemisphericLight,
     Mesh,
     MeshBuilder,
     PointerDragBehavior,
@@ -18,19 +18,21 @@ import {
     Scene,
     StandardMaterial,
     Texture,
-    Vector3
+    Tools,
+    Vector3,
 } from "@babylonjs/core";
+import * as GUI from "@babylonjs/gui";
+
 import { setupPanning } from './panMaster';
-import { setupPointers } from './pointerMaster';
 import { setupKeys } from './keyMaster';
 import { LSEnum, updateLocalStorage } from './localStorageMaster';
-import { setupChangeBgButton } from "./buttonMaster";
+import { OnStopClick } from "./buttonMaster";
 
 const backgrounds = ['collab_room', 'dbla_lobby', 'dtt_ds_bg', 'neon_cafe', 'ytgaming_bg'];
 const canvas = document.getElementById("renderCanvas");
 const engine = new Engine(canvas);
 const scene = new Scene(engine);
-let background; 
+let background;
 let camera;
 export let currentUsers = {};
 export let currentUserMeshes = [];
@@ -38,25 +40,31 @@ export let currentUserMeshes = [];
 const setupBackgroundPlane = () => {
     const randomBgImage = backgrounds[Math.floor(Math.random() * backgrounds.length)];
     updateLocalStorage(LSEnum.currentBg, backgrounds.indexOf(randomBgImage));
+    const planeHeight = 36;
+    const planeWidth = 64;
 
-    background = MeshBuilder.CreatePlane("background", { height: 36, width: 64, sideOrientation: Mesh.DOUBLESIDE }, scene);
-    let bg_material = new BackgroundMaterial("bg_mat", scene);
-    bg_material.diffuseTexture = new Texture(`/content/${randomBgImage}.png`, scene);
+    background = MeshBuilder.CreatePlane("background", { height: planeHeight, width: planeWidth, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    let bgMat = new BackgroundMaterial("bg_mat", scene);
+    bgMat.diffuseTexture = new Texture(`/content/${randomBgImage}.png`, scene);
 
-    background.material = bg_material;
+    background.rotation.y = Tools.ToRadians(-180);
+
+    background.material = bgMat;
+
     background.checkCollisions = true;
     background.position = new Vector3(0, 0, -2);
 };
 
 export const updateBackgroundImage = () => {
-    const currentBackgroundIndex = JSON.parse(window.localStorage.getItem(currentBg));
+    const currentBackgroundIndex = JSON.parse(window.localStorage.getItem(LSEnum.currentBg));
+
     let nextBgIndex = currentBackgroundIndex + 1;
 
     if (nextBgIndex === backgrounds.length) {
         nextBgIndex = 0;
     }
 
-    background.material.diffuseTexture = new Texture(`/content/${backgrounds[nextBgIndex]}.png`, scene); ;
+    background.material.diffuseTexture = new Texture(`/content/${backgrounds[nextBgIndex]}.png`, scene);;
     updateLocalStorage(LSEnum.currentBg, nextBgIndex);
 }
 
@@ -75,11 +83,12 @@ export const getBackgroundPosition = (scene, backgroundPlane) => {
 export const createNewUser = () => {
     let userNumber = currentUserMeshes.length + 1;
     let userName = `avatar#${userNumber}`;
+    let radius = 1.5;
 
     let avatar_material = new StandardMaterial(`${userName}_mat`, scene);
     avatar_material.diffuseTexture = new Texture("/content/placeholder_video.jpg", scene);
 
-    let avatar_mesh = MeshBuilder.CreateDisc(`${userName}_disc`, { radius: 1, sideOrientation: Mesh.DOUBLESIDE }, scene);
+    let avatar_mesh = MeshBuilder.CreateDisc(`${userName}_disc`, { radius: radius, sideOrientation: Mesh.DOUBLESIDE }, scene);
     avatar_mesh.enableEdgesRendering();
     avatar_mesh.edgesWidth = 4.0;
     avatar_mesh.edgesColor = new Color4(0, 0, userNumber, 1);
@@ -88,8 +97,9 @@ export const createNewUser = () => {
     avatar_mesh.material = avatar_material;
 
     if (userNumber > 1) {
-        let prevUserPos = currentUserMeshes[currentUserMeshes.length - 1].position
-        avatar_mesh.position = new Vector3(prevUserPos._x + 2.5, prevUserPos._y, prevUserPos._z)
+        let lastNewUser = currentUserMeshes[currentUserMeshes.length - 1]
+        let new_x = lastNewUser.position._x + (radius + 2.5);
+        avatar_mesh.position = new Vector3(new_x, lastNewUser.position._y, lastNewUser.position._z)
     }
 
     let avatarDrag = new PointerDragBehavior({ dragPlaneNormal: new Vector3(0, 0, 1) });
@@ -129,8 +139,8 @@ export const updateUserTextures = (data) => currentUserMeshes.map(mesh => {
 });
 
 const setUpCamera = () => {
-    camera = new ArcRotateCamera("Camera", 1.6, 1.6, 10, new Vector3(0, 0, 10), scene);
-    camera.inputs.removeByType("mouse")
+    camera = new ArcRotateCamera("camera1", Math.PI / 2, Math.PI / 2, 5, new Vector3(0, 0, 25), scene);
+    camera.inputs.removeByType("mouse");
 
     camera.inputs.clear()
     camera.inputs.addMouseWheel();
@@ -139,7 +149,7 @@ const setUpCamera = () => {
     camera.lowerRadiusLimit = 3; // min zoom possible
     camera.upperRadiusLimit = 15; // max zoom possible
     camera.wheelPrecision = 0.02; // zoom speed
-    /* camera.wheelDeltaPercentage = 5;*/
+    camera.wheelDeltaPercentage = 5;
 
     camera.panningSensibility = 200; // panning speed
     camera.panningAxis.copyFromFloats(0, 0, 0); //None
@@ -148,8 +158,9 @@ const setUpCamera = () => {
 }
 
 const setUpLights = () => {
-    let light = new DirectionalLight("DirectionalLight", new Vector3(-1, -1, -1), scene);
-    light.position = new Vector3(0, 1, 15);
+    let light = new HemisphericLight("light2", new Vector3(0, 1, 1), scene);
+    light.diffuse = new Color3(1, 1, 1);
+    light.specular = new Color3(1, 1, 0);
 
     return light;
 }
@@ -159,21 +170,49 @@ export const clearUserAvatars = () => {
     currentUserMeshes = [];
 }
 
+const createGui = () => {
+    const adt = GUI.AdvancedDynamicTexture.CreateFullscreenUI("saberUI");
+    const panel = new GUI.StackPanel();
+
+    panel.width = "220px";
+    panel.top = "-50px";
+    panel.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    panel.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    adt.addControl(panel);
+
+    addNewGuiButton("End Meeting", OnStopClick, panel);
+    addNewGuiButton("Add New User", createNewUser, panel);
+    addNewGuiButton("Change Background", updateBackgroundImage, panel);
+}
+
+const addNewGuiButton = (name, onClickFunc, panel) => {
+    let btn = GUI.Button.CreateSimpleButton(`${name}`, `${name}`);
+    btn.widthInPixels = 150;
+    btn.paddingBottomInPixels = 5;
+    btn.heightInPixels = 50;
+    btn.color = "white";
+    btn.cornerRadius = 20;
+    btn.background = "black";
+    btn.onPointerClickObservable.add(onClickFunc);
+
+    panel.addControl(btn);
+}
+
 const startBabylon = () => {
     setupBackgroundPlane();
-  /*  createNewUser();*/
     setUpLights();
     let camera = setUpCamera();
 
     setupPanning(scene, camera, canvas)
     setupKeys(scene);
-    /*    setupPointers(mesh, camera, backgroundPlane, scene); */
+
+    createGui();
 
     engine.runRenderLoop(() => {
         scene.render();
     });
 
-    setupChangeBgButton();
+    scene.debugLayer.show();
 };
 
 export default startBabylon;
